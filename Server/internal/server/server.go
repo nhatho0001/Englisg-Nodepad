@@ -2,6 +2,7 @@ package server
 
 import (
 	"app-notepad/configs"
+	"app-notepad/internal/services"
 	"app-notepad/internal/store"
 	"app-notepad/router"
 	"context"
@@ -37,7 +38,7 @@ func (s *Server) Start(ctx context.Context) error {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	router.InitRouter(s.engine)
+	router.InitRouter(s.engine, services.NewUserService(s.query))
 	go func() {
 		slog.Info(fmt.Sprintf("Start server with Port : %v", server.Addr))
 		if err := server.ListenAndServe(); err != nil {

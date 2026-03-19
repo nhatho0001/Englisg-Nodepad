@@ -39,8 +39,6 @@ type RefreshToken struct {
 type User struct {
 	ID             int32
 	Email          string
-	Token          pgtype.Int4
-	Role           pgtype.Text
 	HashedPassword pgtype.Text
 	CreatedAt      pgtype.Timestamp
 	UpdatedAt      pgtype.Timestamp

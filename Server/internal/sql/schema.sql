@@ -4,8 +4,6 @@
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   email VARCHAR NOT NULL,
-  token INTEGER,
-  role VARCHAR,
   hashed_password TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP,

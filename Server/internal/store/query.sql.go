@@ -10,7 +10,7 @@ import (
 )
 
 const getAuthor = `-- name: GetAuthor :one
-SELECT id, email, token, role, hashed_password, created_at, updated_at, deleted_at FROM users
+SELECT id, email, hashed_password, created_at, updated_at, deleted_at FROM users
 WHERE email = $1 and deleted_at IS NULL 
 LIMIT 1
 `
@@ -21,8 +21,6 @@ func (q *Queries) GetAuthor(ctx context.Context, email string) (User, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
-		&i.Token,
-		&i.Role,
 		&i.HashedPassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -32,7 +30,7 @@ func (q *Queries) GetAuthor(ctx context.Context, email string) (User, error) {
 }
 
 const listAuthors = `-- name: ListAuthors :many
-SELECT id, email, token, role, hashed_password, created_at, updated_at, deleted_at FROM users
+SELECT id, email, hashed_password, created_at, updated_at, deleted_at FROM users
 WHERE deleted_at IS NOT NULL
 `
 
@@ -48,8 +46,6 @@ func (q *Queries) ListAuthors(ctx context.Context) ([]User, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Email,
-			&i.Token,
-			&i.Role,
 			&i.HashedPassword,
 			&i.CreatedAt,
 			&i.UpdatedAt,
