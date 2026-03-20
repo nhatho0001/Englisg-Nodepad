@@ -45,7 +45,10 @@ func (u *UserService) CreateUserAccount(ctx context.Context, email string, passw
 			Valid:  true,
 		},
 	}
-	u.query.CreateUser(ctx, new_user)
-	return nil, nil
+	user, err := u.query.CreateUser(ctx, new_user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 
 }

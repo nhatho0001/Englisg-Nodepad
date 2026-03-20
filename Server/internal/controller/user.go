@@ -57,7 +57,7 @@ func (u *UserHander) UserLogin(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Password wrong"))
 		return
 	}
-	fmt.Print(user_login)
+
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"email":    user_login.Email,
 		"password": user_login.Password,
@@ -96,8 +96,9 @@ func (u *UserHander) UserSignUp(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": "Recodre User Is not save",
 		})
+		return
 	}
-
+	fmt.Print(new_user)
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"email":    new_user.Email,
 		"CreateAT": new_user.CreatedAt.Time,
