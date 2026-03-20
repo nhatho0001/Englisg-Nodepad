@@ -64,3 +64,43 @@ func (u *UserHander) UserLogin(c *gin.Context) {
 	})
 
 }
+
+func (u *UserHander) UserSignUp(c *gin.Context) {
+	var user_signup UserInput
+	if err := c.ShouldBindBodyWithJSON(&user_signup); err != nil {
+		slog.Error("Parse data post is faild!")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Data post server is not parse!",
+		})
+		return
+	}
+	if !user_signup.ValidateInputData() {
+		slog.Error("Email and Password is request")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Email and Password is request",
+		})
+		return
+	}
+	if _, err := u.Service.GetUser(c, user_signup.Email); err == nil {
+		slog.Error("Email is exist")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Email is exist",
+		})
+		return
+	}
+
+	new_user, err := u.Service.CreateUserAccount(c, user_signup.Email, user_signup.Password)
+
+	if err != nil {
+		slog.Error("Recodre User Is not save")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "Recodre User Is not save",
+		})
+	}
+
+	c.AbortWithStatusJSON(http.StatusOK, gin.H{
+		"email":    new_user.Email,
+		"CreateAT": new_user.CreatedAt.Time,
+	})
+
+}

@@ -4,6 +4,8 @@ import (
 	"app-notepad/internal/store"
 	"context"
 
+	"github.com/jackc/pgx/v5/pgtype"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -28,4 +30,22 @@ func (u *UserService) CheckPassword(ctx context.Context, password string, hash_p
 		return false
 	}
 	return true
+}
+
+func (u *UserService) CreateUserAccount(ctx context.Context, email string, password string) (*store.User, error) {
+	hash_password, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	new_user := store.CreateUserParams{
+		Email: email,
+		HashedPassword: pgtype.Text{
+			String: string(hash_password),
+			Valid:  true,
+		},
+	}
+	u.query.CreateUser(ctx, new_user)
+	return nil, nil
+
 }

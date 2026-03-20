@@ -7,7 +7,34 @@ package store
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (email, hashed_password)
+VALUES ($1 , $2)
+RETURNING id, email, hashed_password, created_at, updated_at, deleted_at
+`
+
+type CreateUserParams struct {
+	Email          string
+	HashedPassword pgtype.Text
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.HashedPassword)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.HashedPassword,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
 
 const getAuthor = `-- name: GetAuthor :one
 SELECT id, email, hashed_password, created_at, updated_at, deleted_at FROM users

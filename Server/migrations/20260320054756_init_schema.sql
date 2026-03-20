@@ -74,3 +74,10 @@ CREATE TABLE IF NOT EXISTS manage_file (
 
 CREATE INDEX IF NOT EXISTS idx_manage_file_owner
 ON manage_file(owner_id, owner_type);
+
+-- +goose Down
+DROP TABLE IF EXISTS manage_file;
+DROP TABLE IF EXISTS refresh_tokens;
+DROP TABLE IF EXISTS vocabulary;
+DROP TABLE IF EXISTS chapters;
+DROP TABLE IF EXISTS users;

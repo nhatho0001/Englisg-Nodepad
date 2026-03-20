@@ -13,4 +13,5 @@ func InitRouter(r *gin.Engine, s *services.UserService) {
 	userHander := controller.NewUserHander(s)
 	api_user := r.Group("/user")
 	api_user.POST("/login", userHander.UserLogin)
+	api_user.POST("/register", userHander.UserSignUp)
 }
