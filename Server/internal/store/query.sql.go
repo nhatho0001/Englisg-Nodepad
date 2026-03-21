@@ -11,6 +11,37 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createToken = `-- name: CreateToken :one
+INSERT INTO refresh_tokens (user_id, hashed_token , created_at , expires_at)
+VALUES ($1 , $2 , $3 , $4)
+RETURNING id, user_id, hashed_token, created_at, expires_at
+`
+
+type CreateTokenParams struct {
+	UserID      int32
+	HashedToken string
+	CreatedAt   pgtype.Timestamp
+	ExpiresAt   pgtype.Timestamp
+}
+
+func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (RefreshToken, error) {
+	row := q.db.QueryRow(ctx, createToken,
+		arg.UserID,
+		arg.HashedToken,
+		arg.CreatedAt,
+		arg.ExpiresAt,
+	)
+	var i RefreshToken
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.HashedToken,
+		&i.CreatedAt,
+		&i.ExpiresAt,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (email, hashed_password)
 VALUES ($1 , $2)
@@ -36,6 +67,16 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteUserToken = `-- name: DeleteUserToken :exec
+DELETE FROM refresh_tokens
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteUserToken(ctx context.Context, userID int32) error {
+	_, err := q.db.Exec(ctx, deleteUserToken, userID)
+	return err
+}
+
 const getAuthor = `-- name: GetAuthor :one
 SELECT id, email, hashed_password, created_at, updated_at, deleted_at FROM users
 WHERE email = $1 and deleted_at IS NULL 
@@ -54,6 +95,37 @@ func (q *Queries) GetAuthor(ctx context.Context, email string) (User, error) {
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const getTokensByUid = `-- name: GetTokensByUid :many
+SELECT id, user_id, hashed_token, created_at, expires_at FROM refresh_tokens
+WHERE user_id = $1
+`
+
+func (q *Queries) GetTokensByUid(ctx context.Context, userID int32) ([]RefreshToken, error) {
+	rows, err := q.db.Query(ctx, getTokensByUid, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RefreshToken
+	for rows.Next() {
+		var i RefreshToken
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.HashedToken,
+			&i.CreatedAt,
+			&i.ExpiresAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listAuthors = `-- name: ListAuthors :many
