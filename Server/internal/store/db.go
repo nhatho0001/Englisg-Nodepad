@@ -5,7 +5,6 @@
 package store
 
 import (
-	"app-notepad/configs"
 	"context"
 
 	"github.com/jackc/pgx/v5"
@@ -20,15 +19,6 @@ type DBTX interface {
 
 func New(db DBTX) *Queries {
 	return &Queries{db: db}
-}
-
-func ConectDB(ctx context.Context, cfg *configs.Configs) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(ctx, cfg.DataBaseURl())
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
 }
 
 type Queries struct {

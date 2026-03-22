@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 type Server struct {
@@ -27,6 +28,15 @@ func NewServer(cfg *configs.Configs, db store.DBTX) *Server {
 	r := gin.New()
 
 	return &Server{engine: r, cfg: cfg, query: store.New(db)}
+}
+
+func ConectDB(ctx context.Context, cfg *configs.Configs) (*pgx.Conn, error) {
+	conn, err := pgx.Connect(ctx, cfg.DataBaseURl())
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }
 
 func (s *Server) Start(ctx context.Context) error {

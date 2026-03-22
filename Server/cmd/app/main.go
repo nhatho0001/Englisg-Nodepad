@@ -3,7 +3,6 @@ package main
 import (
 	"app-notepad/configs"
 	"app-notepad/internal/server"
-	"app-notepad/internal/store"
 	"context"
 	"fmt"
 	"log"
@@ -15,7 +14,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Load config env file error : %v", err)
 	}
-	db, err := store.ConectDB(ctx, cfg)
+	db, err := server.ConectDB(ctx, cfg)
 	if err != nil {
 		log.Fatalf("Connect DB fail : %v", err)
 	}

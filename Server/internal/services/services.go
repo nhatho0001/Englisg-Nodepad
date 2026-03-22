@@ -1,6 +1,7 @@
 package services
 
 import (
+	"app-notepad/configs"
 	"app-notepad/internal/store"
 	"context"
 	"crypto/sha256"
@@ -13,8 +14,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var signingMethod = jwt.SigningMethodHS256
+
 type UserService struct {
+	cfg   *configs.Configs
 	query *store.Queries
+}
+
+type TokenPair struct {
+	AcessToken   *jwt.Token
+	RefreshToken *jwt.Token
+}
+
+type CustomClaims struct {
+	TokenType string `json:"token_type"`
+	jwt.RegisteredClaims
 }
 
 func NewUserService(q *store.Queries) *UserService {
@@ -97,6 +111,48 @@ func (u *UserService) CreateToken(ctx context.Context, token *jwt.Token, uid int
 
 	return &new_token, nil
 
+}
+
+func (u *UserService) GenerateJWT(uid string) (*TokenPair, error) {
+	issue := "http://" + u.cfg.HOST + ":" + u.cfg.PORT
+	claims := CustomClaims{
+		TokenType: "access",
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			Issuer:    issue,
+			Subject:   uid,
+		},
+	}
+	jwtAccessToken := jwt.NewWithClaims(signingMethod, claims)
+	var err error
+	key := []byte(u.cfg.JWT_SECRET)
+	jwtAccessToken.Raw, err = jwtAccessToken.SignedString(key)
+	if err != nil {
+		return nil, fmt.Errorf("Error generate Access Token :  %v", err)
+	}
+
+	claims_referch := CustomClaims{
+		TokenType: "refresh",
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    issue,
+			Subject:   uid,
+		},
+	}
+	jwtRefreshToken := jwt.NewWithClaims(signingMethod, claims_referch)
+	jwtRefreshToken.Raw, err = jwtRefreshToken.SignedString(key)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error generate Refresh Token :  %v", err)
+	}
+
+	return &TokenPair{
+		AcessToken:   jwtAccessToken,
+		RefreshToken: jwtRefreshToken,
+	}, nil
 }
 
 func (u *UserService) ByTokenAndUid(ctx context.Context, uid int32, token *jwt.Token) (*store.RefreshToken, error) {

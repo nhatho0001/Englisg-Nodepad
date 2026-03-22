@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,9 +59,17 @@ func (u *UserHander) UserLogin(c *gin.Context) {
 		return
 	}
 
+	tokenPair, err := u.Service.GenerateJWT(strconv.FormatUint(uint64(current_user.ID), 10))
+
+	if err != nil {
+		slog.Error("Create Token Faild!")
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Create Token Faild!"))
+		return
+	}
+
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"email":    user_login.Email,
-		"password": user_login.Password,
+		"AccesToken":   tokenPair.AcessToken.Raw,
+		"RefreshToken": tokenPair.RefreshToken.Raw,
 	})
 
 }
