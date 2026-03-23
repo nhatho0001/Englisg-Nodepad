@@ -36,48 +36,48 @@ func (u *UserHander) UserLogin(c *gin.Context) {
 	var user_login UserInput
 	if err := c.ShouldBindBodyWithJSON(&user_login); err != nil {
 		slog.Error(fmt.Sprintf("Parse Info User Is Faild %v", err))
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user info"})
 		return
 	}
 
 	if !user_login.ValidateInputData() {
 		slog.Error("Missing Email or Password")
-		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Missing Info Email or Password"))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Missing Email or Password"})
 		return
 	}
 
 	current_user, err := u.Service.GetUser(c, user_login.Email)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error get User %v", err))
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found or invalid credentials"})
 		return
 	}
 
 	if !u.Service.CheckPassword(c, user_login.Password, current_user.HashedPassword.String) {
 		slog.Error("Password wrong")
-		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Password wrong"))
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Password wrong"})
 		return
 	}
 
 	tokenPair, err := u.Service.GenerateJWT(strconv.FormatUint(uint64(current_user.ID), 10))
 
 	if err != nil {
-		slog.Error("Create Token Faild!")
-		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Create Token Faild!"))
+		slog.Error("Create Token Failed!")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to create tokens"})
 		return
 	}
 
 	_, err = u.Service.DeleteUserToken(c, current_user.ID)
 	if err != nil {
-		slog.Error("Failt when clean Refresh Token!")
-		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("err : %s", err.Error()))
+		slog.Error("Failed when cleaning Refresh Token!")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear old tokens"})
 		return
 	}
 
 	_, err = u.Service.CreateToken(c, tokenPair.RefreshToken, current_user.ID)
 	if err != nil {
 		slog.Error(err.Error())
-		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("err : %s", err.Error()))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to store new token"})
 		return
 	}
 
