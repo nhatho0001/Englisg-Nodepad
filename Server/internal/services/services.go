@@ -31,8 +31,8 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewUserService(q *store.Queries) *UserService {
-	return &UserService{query: q}
+func NewUserService(q *store.Queries, cfg *configs.Configs) *UserService {
+	return &UserService{query: q, cfg: cfg}
 }
 
 func (u *UserService) GetUser(ctx context.Context, email string) (*store.User, error) {
@@ -181,4 +181,14 @@ func (u *UserService) DeleteUserToken(ctx context.Context, uid int32) (bool, err
 		return false, err
 	}
 	return true, nil
+}
+
+func (u *UserService) Parse(tokenString string) (*jwt.Token, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		return []byte(u.cfg.JWT_SECRET), nil
+	}, jwt.WithValidMethods([]string{signingMethod.Alg()}))
+	if err != nil {
+		return nil, fmt.Errorf("Parse JWT error : %w", err)
+	}
+	return token, nil
 }

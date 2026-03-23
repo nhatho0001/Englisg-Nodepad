@@ -67,6 +67,20 @@ func (u *UserHander) UserLogin(c *gin.Context) {
 		return
 	}
 
+	_, err = u.Service.DeleteUserToken(c, current_user.ID)
+	if err != nil {
+		slog.Error("Failt when clean Refresh Token!")
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("err : %s", err.Error()))
+		return
+	}
+
+	_, err = u.Service.CreateToken(c, tokenPair.RefreshToken, current_user.ID)
+	if err != nil {
+		slog.Error(err.Error())
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("err : %s", err.Error()))
+		return
+	}
+
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"AccesToken":   tokenPair.AcessToken.Raw,
 		"RefreshToken": tokenPair.RefreshToken.Raw,
