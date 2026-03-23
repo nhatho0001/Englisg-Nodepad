@@ -2,6 +2,7 @@ package server
 
 import (
 	"app-notepad/configs"
+	"app-notepad/internal/middleware"
 	"app-notepad/internal/services"
 	"app-notepad/internal/store"
 	"app-notepad/router"
@@ -26,6 +27,7 @@ type Server struct {
 
 func NewServer(cfg *configs.Configs, db store.DBTX) *Server {
 	r := gin.New()
+	r.Use(middleware.NewCORSMiddleware())
 
 	return &Server{engine: r, cfg: cfg, query: store.New(db)}
 }

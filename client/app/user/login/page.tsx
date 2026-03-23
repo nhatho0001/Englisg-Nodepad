@@ -25,6 +25,9 @@ export default function LoginPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
       const data = await apiFetch<{ AccesToken: string; RefreshToken: string }>('/user/login', {
         method: 'POST',
@@ -36,7 +39,7 @@ export default function LoginPage() {
 
       localStorage.setItem('accessToken', data.AccesToken);
       localStorage.setItem('refreshToken', data.RefreshToken);
-      
+
       router.push('/');
     } catch (err: any) {
       console.error('API Error:', err);
