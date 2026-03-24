@@ -9,10 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitRouter(r *gin.Engine, s *services.UserService) {
+func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterService) {
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())
+
 	userHander := controller.NewUserHander(s)
+	chapterHander := controller.NewChapterHander(ch)
+
 	custom_middleware := middleware.NewMiddleware(s)
 	api_user := r.Group("/user")
 	api_user.POST("/login", userHander.UserLogin)
@@ -24,6 +27,9 @@ func InitRouter(r *gin.Engine, s *services.UserService) {
 			"message": "Hello world",
 		})
 	})
+
+	api_chapter = r.Group("/chapter", custom_middleware.NewAuthMiddleware(), custom_middleware.AuthenOwnerMiddleware())
+	api_chapter.GET("/list-chapter/:uid", chapterHander.GetListChapter)
 
 	api_setting := r.Group("/user-setting", custom_middleware.NewAuthMiddleware())
 	api_setting.POST(

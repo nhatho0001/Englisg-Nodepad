@@ -50,7 +50,7 @@ func (s *Server) Start(ctx context.Context) error {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	router.InitRouter(s.engine, services.NewUserService(s.query, s.cfg))
+	router.InitRouter(s.engine, services.NewUserService(s.query, s.cfg), services.NewChapterService(s.query, s.cfg))
 	go func() {
 		slog.Info(fmt.Sprintf("Start server with Port : %v", server.Addr))
 		if err := server.ListenAndServe(); err != nil {
