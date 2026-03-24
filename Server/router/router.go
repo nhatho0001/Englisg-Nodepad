@@ -24,4 +24,9 @@ func InitRouter(r *gin.Engine, s *services.UserService) {
 			"message": "Hello world",
 		})
 	})
+
+	api_setting := r.Group("/user-setting", custom_middleware.NewAuthMiddleware())
+	api_setting.POST(
+		"/refresh-token", userHander.UpdateRefreshToken,
+	)
 }
