@@ -9,12 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterService) {
+func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterService, vs *services.VocabularyService) {
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())
 
 	userHander := controller.NewUserHander(s)
 	chapterHander := controller.NewChapterHander(ch)
+	vocavularyHander := controller.NewVocabularyHandler(vs)
 
 	custom_middleware := middleware.NewMiddleware(s)
 	api_user := r.Group("/user")
@@ -35,4 +36,9 @@ func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterServ
 	api_setting.POST(
 		"/refresh-token", userHander.UpdateRefreshToken,
 	)
+
+	api_vocabulary := r.Group("/vocabulary", custom_middleware.NewAuthMiddleware())
+	api_vocabulary.POST("/create", vocavularyHander.CreateVocabulary)
+	api_vocabulary.GET("/chapter", vocavularyHander.GetVocabularyOfChapter)
+	api_vocabulary.GET("/user", vocavularyHander.GetVocabularyOfUser)
 }
