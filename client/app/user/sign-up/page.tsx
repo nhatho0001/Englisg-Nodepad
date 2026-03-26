@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
+import SendIcon from '@mui/icons-material/Send';
+import { TextField, Button, Box, Typography, Container, Paper } from '@mui/material';
 import styles from '../user.module.css';
 
 export default function SignUpPage() {
@@ -53,33 +55,39 @@ export default function SignUpPage() {
         {error && <p className={styles.error}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
-          <input
-            className={styles.input}
+          <TextField
+            fullWidth
+            id="standard-search"
+            label="Email"
             type="email"
-            placeholder="Email"
+            variant="standard"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             required
           />
-
-          <input
-            className={styles.input}
+          <TextField
+            fullWidth
+            id="standard-search"
+            label="Password"
             type="password"
-            placeholder="Password"
+            variant="standard"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
             required
+            sx={{ mt: 2, mb: 2 }}
           />
-
-          <button
-            className={styles.button}
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? 'Processing...' : 'Sign Up'}
-          </button>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            {
+              loading ? <Button loading variant="outlined" loadingPosition="start">
+                Submit
+              </Button> :
+              (<Button type="submit" variant="outlined" endIcon={<SendIcon />}>
+                Login
+              </Button>) 
+            }
+          </Box>
         </form>
 
         <div className={styles.link}>
