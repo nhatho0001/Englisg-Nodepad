@@ -31,18 +31,21 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const data = await apiFetch<{ AccesToken: string; RefreshToken: string }>('/user/login', {
-        method: 'POST',
+      // const data = await apiFetch<{ AccesToken: string; RefreshToken: string }>('/user/login', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ email, password }),
+      // });
+      const res = await fetch('/api/user/login', {
+        method: "POST",
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
-
-      localStorage.setItem('accessToken', data.AccesToken);
-      localStorage.setItem('refreshToken', data.RefreshToken);
-
-      router.push('/');
+      res.ok ? router.push('/chapter') : setError('Login failed. Please try again.');;
     } catch (err: any) {
       console.error('API Error:', err);
       setError(err.message || 'Login failed. Please try again.');
