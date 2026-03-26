@@ -4,7 +4,6 @@ import (
 	"app-notepad/internal/controller"
 	"app-notepad/internal/middleware"
 	"app-notepad/internal/services"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,14 +22,9 @@ func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterServ
 	api_user.POST("/register", userHander.UserSignUp)
 	api_chapter := r.Group("/chapter")
 	api_chapter.Use(custom_middleware.NewAuthMiddleware())
-	api_chapter.GET("/list-chapter", func(c *gin.Context) {
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"message": "Hello world",
-		})
-	})
 
-	api_chapter = r.Group("/chapter", custom_middleware.NewAuthMiddleware(), custom_middleware.AuthenOwnerMiddleware())
-	api_chapter.GET("/list-chapter/:uid", chapterHander.GetListChapter)
+	api_chapter = r.Group("/chapter", custom_middleware.NewAuthMiddleware())
+	api_chapter.GET("/list-chapter", chapterHander.GetListChapter)
 
 	api_setting := r.Group("/user-setting", custom_middleware.NewAuthMiddleware())
 	api_setting.POST(

@@ -20,17 +20,25 @@ func NewChapterHander(s *services.ChapterService) *ChapterHander {
 }
 
 func (ch *ChapterHander) GetListChapter(c *gin.Context) {
-	uid := c.Param("uid")
-	uid_64, err := strconv.ParseInt(uid, 10, 32)
-	if err != nil {
-		slog.Error("Param is not suitable")
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "Param is not suitable",
-		})
+	uidAny, exist := c.Get("uid")
+	if !exist {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "You cannot access this page!"})
 		return
 	}
 
-	chapter_list, err := ch.Chapter.GetListChapter(c, int32(uid_64))
+	uidStr, ok := uidAny.(string)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Invalid user ID format in context"})
+		return
+	}
+
+	uidInt, err := strconv.Atoi(uidStr)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: invalid user ID"})
+		return
+	}
+
+	chapter_list, err := ch.Chapter.GetListChapter(c, int32(uidInt))
 	if err != nil {
 		slog.Error(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
