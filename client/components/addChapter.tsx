@@ -1,51 +1,38 @@
-import {VocabularyInput} from '@/app/chapter/create/page'
-import { Box } from '@mui/material'
-import { Dispatch , SetStateAction ,  } from 'react'
-import TextField from '@mui/material/TextField';
-import { Key, useState } from "react"
-export default function CreateListVocabulary({listVocabulary , setListVocabulary} : {listVocabulary : VocabularyInput[] ,setListVocabulary : Dispatch<SetStateAction<VocabularyInput[]>> }) {
-    const editOriginContent = (id : Key , content : string ) => {
-        var index = getVocabularyId(id)
-        listVocabulary[index] = {
-            ...listVocabulary[index] , 
-            OriginContent : content
-        }
-        setListVocabulary(listVocabulary)
+import { VocabularyInput } from '@/app/chapter/create/page'
+import { Box, Stack } from '@mui/material'
+import { Dispatch, SetStateAction } from 'react'
+import { Key } from "react"
+import FieldAddContent from './fieldAddContent';
+
+export default function CreateListVocabulary({ listVocabulary, setListVocabulary }: { listVocabulary: VocabularyInput[], setListVocabulary: Dispatch<SetStateAction<VocabularyInput[]>> }) {
+    const editOriginContent = (id: Key, content: string) => {
+        setListVocabulary(prev => prev.map(item =>
+            item.ID === id ? { ...item, OriginContent: content } : item
+        ));
     }
-    
-    const editDescriptionContent = (id : Key , content : string ) => {
-        var index = getVocabularyId(id)
-        listVocabulary[index] = {
-            ...listVocabulary[index] , 
-            Description : content
-        }
-        setListVocabulary(listVocabulary)
+
+    const editDescriptionContent = (id: Key, content: string) => {
+        setListVocabulary(prev => prev.map(item =>
+            item.ID === id ? { ...item, Description: content } : item
+        ));
     }
-    const getVocabularyId = (id : Key)  => {
-        return listVocabulary.findIndex((element) => {
-            return element.ID == id
-        })
+
+    const deleteVocabulary = (id: Key) => {
+        setListVocabulary(prev => prev.filter(item => item.ID !== id));
     }
-    return <Box>
-        {listVocabulary.map((element) =>  {
-            return <div key={element.ID} >
-                <TextField
-                    id="outlined-controlled"
-                    label="Controlled"
-                    defaultValue={element.OriginContent}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                        editOriginContent(element.ID , event.target.value);
-                    }}
+
+    return (
+        <Stack spacing={3}>
+            {listVocabulary.map((element, index) => (
+                <FieldAddContent
+                    key={element.ID}
+                    index={index}
+                    element={element}
+                    editOriginContent={editOriginContent}
+                    editDescriptionContent={editDescriptionContent}
+                    deleteVocabulary={deleteVocabulary}
                 />
-                <TextField
-                    id="outlined-controlled"
-                    label="Controlled"
-                    defaultValue={element.Description}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                        editDescriptionContent(element.ID , event.target.value);
-                    }}
-                />
-            </div>
-        })}
-    </Box>
+            ))}
+        </Stack>
+    )
 }
