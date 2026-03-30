@@ -17,6 +17,22 @@ func NewChapterService(q *store.Queries, cfg *configs.Configs) *ChapterService {
 	return &ChapterService{query: q, cfg: cfg}
 }
 
+func (chapter *ChapterService) GetChapterById(ctx context.Context, id int32) (*store.Chapter, error) {
+	data, err := chapter.query.GetChaptersById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+func (chapter *ChapterService) GetVocabularyOfChapter(ctx context.Context, chapter_id pgtype.Int4) ([]store.Vocabulary, error) {
+	data, err := chapter.query.GetVocabularyOfChapter(ctx, chapter_id)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 func (chapter *ChapterService) GetListChapter(ctx context.Context, uid int32) ([]store.Chapter, error) {
 	list_chapter, err := chapter.query.GetChaptersByUser(ctx, uid)
 	if err != nil {

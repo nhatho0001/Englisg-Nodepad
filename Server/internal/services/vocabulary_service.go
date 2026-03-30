@@ -19,14 +19,6 @@ func NewVocabularyService(cfg *configs.Configs, query *store.Queries) *Vocabular
 }
 
 func (v *VocabularyService) GetVocabularyOfChapter(ctx context.Context, arg *store.GetCharacterVocabularyParams) ([]store.Vocabulary, error) {
-	// list_character, err := v.query.GetCharacterVocabulary(ctx, store.GetCharacterVocabularyParams{
-	// 	ChapterID: pgtype.Int4{
-	// 		Int32: chapter_id,
-	// 		Valid: true,
-	// 	},
-	// 	Limit:  limit,
-	// 	Offset: offset,
-	// })
 	list_character, err := v.query.GetCharacterVocabulary(ctx, *arg)
 	if err != nil {
 		return nil, err

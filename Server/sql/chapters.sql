@@ -6,3 +6,11 @@ RETURNING *;
 -- name: GetChaptersByUser :many
 SELECT * FROM chapters
 WHERE user_id = $1;
+
+-- name: GetChaptersById :one
+SELECT * FROM chapters
+WHERE id = $1;
+
+-- name: GetVocabularyOfChapter :many
+SELECT * FROM vocabulary
+WHERE chapter_id = $1;

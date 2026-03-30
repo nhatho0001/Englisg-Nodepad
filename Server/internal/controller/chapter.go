@@ -71,6 +71,43 @@ func (ch *ChapterHander) GetListChapter(c *gin.Context) {
 	})
 }
 
+func (ch *ChapterHander) GetDetailChapter(c *gin.Context) {
+	var query_data SearchFilters
+	if err := c.BindQuery(&query_data); err != nil {
+		slog.Error("Parse data post is faild!")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Data post server is not parse!",
+		})
+		return
+	}
+
+	chapter, err := ch.Chapter.GetChapterById(c, query_data.ID)
+	if err != nil {
+		slog.Error("Get Chapter is faild!")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Get Chapter is faild!",
+		})
+		return
+	}
+
+	list_vocabulary, err := ch.Chapter.GetVocabularyOfChapter(c, pgtype.Int4{
+		Int32: chapter.ID,
+		Valid: true,
+	})
+	if err != nil {
+		slog.Error("Get Vocabulary of Chapter is faild")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Get Vocabulary of Chapter is faild",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, ChapterResponse{
+		Chapter:         *chapter,
+		List_Vocabulary: list_vocabulary,
+	})
+}
+
 func (ch *ChapterHander) CreateChapter(c *gin.Context) {
 	var data ChapterRequest
 	if err := c.ShouldBindBodyWithJSON(&data); err != nil {

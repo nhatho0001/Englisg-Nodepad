@@ -43,6 +43,25 @@ func (q *Queries) CreateChapter(ctx context.Context, arg CreateChapterParams) (C
 	return i, err
 }
 
+const getChaptersById = `-- name: GetChaptersById :one
+SELECT id, title, body, user_id, status, created_at FROM chapters
+WHERE id = $1
+`
+
+func (q *Queries) GetChaptersById(ctx context.Context, id int32) (Chapter, error) {
+	row := q.db.QueryRow(ctx, getChaptersById, id)
+	var i Chapter
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Body,
+		&i.UserID,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getChaptersByUser = `-- name: GetChaptersByUser :many
 SELECT id, title, body, user_id, status, created_at FROM chapters
 WHERE user_id = $1
@@ -63,6 +82,38 @@ func (q *Queries) GetChaptersByUser(ctx context.Context, userID int32) ([]Chapte
 			&i.Body,
 			&i.UserID,
 			&i.Status,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getVocabularyOfChapter = `-- name: GetVocabularyOfChapter :many
+SELECT id, chapter_id, origin_content, description, practice_time, created_at FROM vocabulary
+WHERE chapter_id = $1
+`
+
+func (q *Queries) GetVocabularyOfChapter(ctx context.Context, chapterID pgtype.Int4) ([]Vocabulary, error) {
+	rows, err := q.db.Query(ctx, getVocabularyOfChapter, chapterID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Vocabulary
+	for rows.Next() {
+		var i Vocabulary
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChapterID,
+			&i.OriginContent,
+			&i.Description,
+			&i.PracticeTime,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
