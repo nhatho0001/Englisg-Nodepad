@@ -14,3 +14,9 @@ WHERE id = $1;
 -- name: GetVocabularyOfChapter :many
 SELECT * FROM vocabulary
 WHERE chapter_id = $1;
+
+-- name: UpdateChapters :one
+UPDATE chapters SET
+title = $2 , body = $3 , status = $4
+WHERE id = $1
+RETURNING *;

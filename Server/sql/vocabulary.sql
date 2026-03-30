@@ -17,3 +17,9 @@ LIMIT $2 OFFSET $3;
 INSERT INTO vocabulary (chapter_id , origin_content , description)
 VALUES ($1, $2, $3)
 RETURNING *;
+
+-- name: UpdateVocabulary :one
+UPDATE vocabulary SET 
+origin_content = $2 , description = $3
+WHERE id = $1
+RETURNING *;

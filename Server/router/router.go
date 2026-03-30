@@ -26,6 +26,7 @@ func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterServ
 	api_chapter = r.Group("/chapter", custom_middleware.NewAuthMiddleware())
 	api_chapter.GET("/list-chapter", chapterHander.GetListChapter)
 	api_chapter.GET("/list-vocabulary", chapterHander.GetDetailChapter)
+	api_chapter.PUT("/update-chapter", chapterHander.UpdateChapter)
 	api_chapter.POST("/create", chapterHander.CreateChapter)
 
 	api_setting := r.Group("/user-setting", custom_middleware.NewAuthMiddleware())

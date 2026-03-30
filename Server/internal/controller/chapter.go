@@ -170,3 +170,33 @@ func (ch *ChapterHander) CreateChapter(c *gin.Context) {
 	})
 
 }
+
+func (ch *ChapterHander) UpdateChapter(c *gin.Context) {
+	var data services.ChapterInfoParams
+	if err := c.ShouldBindBodyWithJSON(&data); err != nil {
+		slog.Error(err.Error())
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if !data.ValidateDataInput() {
+		slog.Error("Data Request is missing")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Data Request is missing",
+		})
+		return
+	}
+
+	reponse, err := ch.Chapter.UpdateChapterAndVocabulary(c, &data)
+	if err != nil {
+		slog.Error(err.Error())
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, reponse)
+
+}

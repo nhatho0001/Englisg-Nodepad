@@ -137,3 +137,30 @@ func (q *Queries) GetVocabularyOfUser(ctx context.Context, arg GetVocabularyOfUs
 	}
 	return items, nil
 }
+
+const updateVocabulary = `-- name: UpdateVocabulary :one
+UPDATE vocabulary SET 
+origin_content = $2 , description = $3
+WHERE id = $1
+RETURNING id, chapter_id, origin_content, description, practice_time, created_at
+`
+
+type UpdateVocabularyParams struct {
+	ID            int32
+	OriginContent pgtype.Text
+	Description   pgtype.Text
+}
+
+func (q *Queries) UpdateVocabulary(ctx context.Context, arg UpdateVocabularyParams) (Vocabulary, error) {
+	row := q.db.QueryRow(ctx, updateVocabulary, arg.ID, arg.OriginContent, arg.Description)
+	var i Vocabulary
+	err := row.Scan(
+		&i.ID,
+		&i.ChapterID,
+		&i.OriginContent,
+		&i.Description,
+		&i.PracticeTime,
+		&i.CreatedAt,
+	)
+	return i, err
+}

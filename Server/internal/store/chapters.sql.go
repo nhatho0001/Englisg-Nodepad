@@ -125,3 +125,36 @@ func (q *Queries) GetVocabularyOfChapter(ctx context.Context, chapterID pgtype.I
 	}
 	return items, nil
 }
+
+const updateChapters = `-- name: UpdateChapters :one
+UPDATE chapters SET
+title = $2 , body = $3 , status = $4
+WHERE id = $1
+RETURNING id, title, body, user_id, status, created_at
+`
+
+type UpdateChaptersParams struct {
+	ID     int32
+	Title  pgtype.Text
+	Body   pgtype.Text
+	Status pgtype.Text
+}
+
+func (q *Queries) UpdateChapters(ctx context.Context, arg UpdateChaptersParams) (Chapter, error) {
+	row := q.db.QueryRow(ctx, updateChapters,
+		arg.ID,
+		arg.Title,
+		arg.Body,
+		arg.Status,
+	)
+	var i Chapter
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Body,
+		&i.UserID,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
+}

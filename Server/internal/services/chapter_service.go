@@ -13,6 +13,23 @@ type ChapterService struct {
 	query *store.Queries
 }
 
+type ChapterInfo struct {
+	Chapter         *store.Chapter
+	List_Vocabulary []store.Vocabulary
+}
+
+type ChapterInfoParams struct {
+	Chapter         *store.UpdateChaptersParams
+	List_Vocabulary []store.UpdateVocabularyParams
+}
+
+func (cp *ChapterInfoParams) ValidateDataInput() bool {
+	if !cp.Chapter.Title.Valid {
+		return false
+	}
+	return true
+}
+
 func NewChapterService(q *store.Queries, cfg *configs.Configs) *ChapterService {
 	return &ChapterService{query: q, cfg: cfg}
 }
@@ -62,4 +79,38 @@ func (chapter *ChapterService) CreateVocabularyOfService(ctx context.Context, ar
 		}
 	}
 	return result
+}
+
+func (chapter *ChapterService) UpdateChapterService(ctx context.Context, arg store.UpdateChaptersParams) (*store.Chapter, error) {
+	chapter_update, err := chapter.query.UpdateChapters(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	return &chapter_update, nil
+}
+
+func (chapter *ChapterService) UpdateVocabularyService(ctx context.Context, arg []store.UpdateVocabularyParams) ([]store.Vocabulary, error) {
+	vocabulary_list := make([]store.Vocabulary, len(arg))
+	for index, vocabulary := range arg {
+		update_vocabulary, err := chapter.query.UpdateVocabulary(ctx, vocabulary)
+		if err == nil {
+			vocabulary_list[index] = update_vocabulary
+		}
+	}
+	return vocabulary_list, nil
+}
+
+func (chapter *ChapterService) UpdateChapterAndVocabulary(ctx context.Context, arg *ChapterInfoParams) (*ChapterInfo, error) {
+	update_chapter, err := chapter.UpdateChapterService(ctx, *arg.Chapter)
+	if err != nil {
+		return nil, err
+	}
+	list_update_vocabulary, err := chapter.UpdateVocabularyService(ctx, arg.List_Vocabulary)
+	if err != nil {
+		return nil, err
+	}
+	return &ChapterInfo{
+		Chapter:         update_chapter,
+		List_Vocabulary: list_update_vocabulary,
+	}, nil
 }
