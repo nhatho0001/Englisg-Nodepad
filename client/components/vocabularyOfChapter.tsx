@@ -5,37 +5,11 @@ import { Container, Paper, Typography, Box, Button, Divider } from "@mui/materia
 import { apiFetch } from "@/lib/api";
 import { FormControl, InputLabel, OutlinedInput, FormHelperText } from '@mui/material';
 import { TextField, Stack } from '@mui/material';
-
-type VocabularyInput = {
-  ID: Key;
-  OriginContent?: string;
-  Description?: string;
-}
-
-type ChapterInput = {
-  ID  ?:   Key;
-  Title:  String;
-  Body :   String;
-  Status :  String;
-}
-
-export { type VocabularyInput }
-
-export { type ChapterInput }
-
-export default function CrateNewChapter() {
-  const [newChapter , setNewChapter] =  useState<ChapterInput>({
-    Title : "" ,
-    Body : "" , 
-    Status : "new" , 
-  }) ; 
-  const [listVocabulary, setListVocabulary] = useState<VocabularyInput[]>([
-    {
-      ID: Date.now(),
-      OriginContent: '',
-      Description: ''
-    },
-  ])
+import { VocabularyInput, ChapterInput } from '@/app/chapter/create/page'
+export default function ListVocabulary({list_data , chapter} : {list_data : VocabularyInput[] , chapter :  ChapterInput}) {
+  
+  const [newChapter , setNewChapter] =  useState<ChapterInput>(chapter) ; 
+  const [listVocabulary, setListVocabulary] = useState<VocabularyInput[]>(list_data)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +20,6 @@ export default function CrateNewChapter() {
       },
       body: JSON.stringify({Chapter : newChapter , List_Vocabulary : listVocabulary })
     })
-    console.log(response)
   }
 
   const addNewVocabulary = () => {

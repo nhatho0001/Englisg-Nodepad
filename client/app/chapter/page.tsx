@@ -9,7 +9,6 @@ import { cookies } from "next/headers";
 export default async function PageListChapter() {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("refreshToken")?.value;
-    console.log(accessToken)
     const response = await apiFetch<{ data: any[] }>("/chapter/list-chapter", {
         method: 'GET',
         headers: {
