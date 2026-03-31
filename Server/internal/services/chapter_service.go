@@ -20,7 +20,7 @@ type ChapterInfo struct {
 
 type ChapterInfoParams struct {
 	Chapter         *store.UpdateChaptersParams
-	List_Vocabulary []store.UpdateVocabularyParams
+	List_Vocabulary []store.CreateVocabularyParams
 }
 
 func (cp *ChapterInfoParams) ValidateDataInput() bool {
@@ -105,10 +105,16 @@ func (chapter *ChapterService) UpdateChapterAndVocabulary(ctx context.Context, a
 	if err != nil {
 		return nil, err
 	}
-	list_update_vocabulary, err := chapter.UpdateVocabularyService(ctx, arg.List_Vocabulary)
-	if err != nil {
+	if err := chapter.query.DeleteVocabularyOfChapter(ctx, pgtype.Int4{
+		Int32: update_chapter.ID,
+		Valid: true,
+	}); err != nil {
 		return nil, err
 	}
+	list_update_vocabulary := chapter.CreateVocabularyOfService(ctx, arg.List_Vocabulary, pgtype.Int4{
+		Int32: update_chapter.ID,
+		Valid: true,
+	})
 	return &ChapterInfo{
 		Chapter:         update_chapter,
 		List_Vocabulary: list_update_vocabulary,

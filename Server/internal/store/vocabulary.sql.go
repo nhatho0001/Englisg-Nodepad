@@ -37,6 +37,16 @@ func (q *Queries) CreateVocabulary(ctx context.Context, arg CreateVocabularyPara
 	return i, err
 }
 
+const deleteVocabularyOfChapter = `-- name: DeleteVocabularyOfChapter :exec
+DELETE FROM vocabulary
+WHERE chapter_id =  $1
+`
+
+func (q *Queries) DeleteVocabularyOfChapter(ctx context.Context, chapterID pgtype.Int4) error {
+	_, err := q.db.Exec(ctx, deleteVocabularyOfChapter, chapterID)
+	return err
+}
+
 const getCharacterVocabulary = `-- name: GetCharacterVocabulary :many
 SELECT id, chapter_id, origin_content, description, practice_time, created_at FROM vocabulary
 WHERE  chapter_id = $1 

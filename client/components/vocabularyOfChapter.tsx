@@ -7,14 +7,14 @@ import { FormControl, InputLabel, OutlinedInput, FormHelperText } from '@mui/mat
 import { TextField, Stack } from '@mui/material';
 import { VocabularyInput, ChapterInput } from '@/app/chapter/create/page'
 export default function ListVocabulary({list_data , chapter} : {list_data : VocabularyInput[] , chapter :  ChapterInput}) {
-  
+  console.log(list_data)
   const [newChapter , setNewChapter] =  useState<ChapterInput>(chapter) ; 
   const [listVocabulary, setListVocabulary] = useState<VocabularyInput[]>(list_data)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("/api/chapter/create" ,  {
-      method: 'POST',
+    const response = await fetch("/api/chapter/update-chapter" ,  {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },

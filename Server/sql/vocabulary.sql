@@ -23,3 +23,7 @@ UPDATE vocabulary SET
 origin_content = $2 , description = $3
 WHERE id = $1
 RETURNING *;
+
+-- name: DeleteVocabularyOfChapter :exec
+DELETE FROM vocabulary
+WHERE chapter_id =  $1;
