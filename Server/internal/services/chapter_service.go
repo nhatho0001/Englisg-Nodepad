@@ -103,7 +103,13 @@ func (chapter *ChapterService) UpdateVocabularyService(ctx context.Context, arg 
 	return vocabulary_list, nil
 }
 
-func (chapter *ChapterService) UpdateChapterAndVocabulary(ctx context.Context, arg *ChapterInfoParams) (*ChapterInfo, error) {
+func (chapter *ChapterService) UpdateChapterAndVocabulary(ctx context.Context, db *pgx.Conn, arg *ChapterInfoParams) (*ChapterInfo, error) {
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
 	update_chapter, err := chapter.UpdateChapterService(ctx, *arg.Chapter)
 	if err != nil {
 		return nil, err
@@ -118,6 +124,7 @@ func (chapter *ChapterService) UpdateChapterAndVocabulary(ctx context.Context, a
 		Int32: update_chapter.ID,
 		Valid: true,
 	})
+	tx.Commit(ctx)
 	return &ChapterInfo{
 		Chapter:         update_chapter,
 		List_Vocabulary: list_update_vocabulary,

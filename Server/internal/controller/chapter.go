@@ -191,7 +191,7 @@ func (ch *ChapterHander) UpdateChapter(c *gin.Context) {
 		return
 	}
 
-	reponse, err := ch.Chapter.UpdateChapterAndVocabulary(c, &data)
+	reponse, err := ch.Chapter.UpdateChapterAndVocabulary(c, ch.db, &data)
 	if err != nil {
 		slog.Error(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
