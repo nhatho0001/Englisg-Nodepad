@@ -43,6 +43,16 @@ func (q *Queries) CreateChapter(ctx context.Context, arg CreateChapterParams) (C
 	return i, err
 }
 
+const deleteChapter = `-- name: DeleteChapter :exec
+DELETE FROM chapters 
+WHERE  id = $1
+`
+
+func (q *Queries) DeleteChapter(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, deleteChapter, id)
+	return err
+}
+
 const getChaptersById = `-- name: GetChaptersById :one
 SELECT id, title, body, user_id, status, created_at FROM chapters
 WHERE id = $1

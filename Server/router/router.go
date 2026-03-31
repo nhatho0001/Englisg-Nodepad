@@ -6,14 +6,15 @@ import (
 	"app-notepad/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
-func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterService, vs *services.VocabularyService) {
+func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterService, vs *services.VocabularyService, db *pgx.Conn) {
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())
 
 	userHander := controller.NewUserHander(s)
-	chapterHander := controller.NewChapterHander(ch)
+	chapterHander := controller.NewChapterHander(ch, db)
 	vocavularyHander := controller.NewVocabularyHandler(vs)
 
 	custom_middleware := middleware.NewMiddleware(s)
@@ -28,6 +29,7 @@ func InitRouter(r *gin.Engine, s *services.UserService, ch *services.ChapterServ
 	api_chapter.GET("/list-vocabulary", chapterHander.GetDetailChapter)
 	api_chapter.PUT("/update-chapter", chapterHander.UpdateChapter)
 	api_chapter.POST("/create", chapterHander.CreateChapter)
+	api_chapter.DELETE("/delete", chapterHander.DeleteChapter)
 
 	api_setting := r.Group("/user-setting", custom_middleware.NewAuthMiddleware())
 	api_setting.POST(

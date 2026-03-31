@@ -20,3 +20,7 @@ UPDATE chapters SET
 title = $2 , body = $3 , status = $4
 WHERE id = $1
 RETURNING *;
+
+-- name: DeleteChapter :exec
+DELETE FROM chapters 
+WHERE  id = $1;

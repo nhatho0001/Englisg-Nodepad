@@ -4,7 +4,9 @@ import (
 	"app-notepad/configs"
 	"app-notepad/internal/store"
 	"context"
+	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -59,9 +61,10 @@ func (chapter *ChapterService) GetListChapter(ctx context.Context, uid int32) ([
 }
 
 func (chapter *ChapterService) CreateChapter(ctx context.Context, arg *store.CreateChapterParams) (*store.Chapter, error) {
-	if arg.Status.String == "" {
+	if !arg.Status.Valid {
 		arg.Status.String = "new"
 	}
+	fmt.Println(arg)
 	new_chapter, err := chapter.query.CreateChapter(ctx, *arg)
 	if err != nil {
 		return nil, err
@@ -119,4 +122,24 @@ func (chapter *ChapterService) UpdateChapterAndVocabulary(ctx context.Context, a
 		Chapter:         update_chapter,
 		List_Vocabulary: list_update_vocabulary,
 	}, nil
+}
+
+func (chapter *ChapterService) DeleteChapter(ctx context.Context, db *pgx.Conn, chapter_id int32) error {
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	if err := chapter.query.DeleteVocabularyOfChapter(ctx, pgtype.Int4{
+		Int32: chapter_id,
+		Valid: true,
+	}); err != nil {
+		return err
+	}
+	if err := chapter.query.DeleteChapter(ctx, chapter_id); err != nil {
+		return err
+	}
+	tx.Commit(ctx)
+
+	return nil
 }

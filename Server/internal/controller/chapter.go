@@ -8,11 +8,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type ChapterHander struct {
 	Chapter *services.ChapterService
+	db      *pgx.Conn
 }
 
 type ChapterRequest struct {
@@ -32,9 +34,10 @@ func (c *ChapterRequest) ValidateDataInput() bool {
 	return true
 }
 
-func NewChapterHander(s *services.ChapterService) *ChapterHander {
+func NewChapterHander(s *services.ChapterService, db *pgx.Conn) *ChapterHander {
 	return &ChapterHander{
 		Chapter: s,
+		db:      db,
 	}
 }
 
@@ -198,5 +201,28 @@ func (ch *ChapterHander) UpdateChapter(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, reponse)
+
+}
+
+func (ch *ChapterHander) DeleteChapter(c *gin.Context) {
+	var query_data SearchFilters
+	if err := c.BindQuery(&query_data); err != nil {
+		slog.Error("Parse id chapter is faild!")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Data id chapter is not parse!",
+		})
+		return
+	}
+	if err := ch.Chapter.DeleteChapter(c, ch.db, query_data.ID); err != nil {
+		slog.Error("Delete chapter is faild!")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Delete chapter is faild!",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+	})
 
 }

@@ -23,13 +23,14 @@ type Server struct {
 	engine *gin.Engine
 	cfg    *configs.Configs
 	query  *store.Queries
+	db     *pgx.Conn
 }
 
-func NewServer(cfg *configs.Configs, db store.DBTX) *Server {
+func NewServer(cfg *configs.Configs, db *pgx.Conn) *Server {
 	r := gin.New()
 	r.Use(middleware.NewCORSMiddleware())
 
-	return &Server{engine: r, cfg: cfg, query: store.New(db)}
+	return &Server{engine: r, cfg: cfg, query: store.New(db), db: db}
 }
 
 func ConectDB(ctx context.Context, cfg *configs.Configs) (*pgx.Conn, error) {
@@ -50,7 +51,7 @@ func (s *Server) Start(ctx context.Context) error {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	router.InitRouter(s.engine, services.NewUserService(s.query, s.cfg), services.NewChapterService(s.query, s.cfg), services.NewVocabularyService(s.cfg, s.query))
+	router.InitRouter(s.engine, services.NewUserService(s.query, s.cfg), services.NewChapterService(s.query, s.cfg), services.NewVocabularyService(s.cfg, s.query), s.db)
 	go func() {
 		slog.Info(fmt.Sprintf("Start server with Port : %v", server.Addr))
 		if err := server.ListenAndServe(); err != nil {
